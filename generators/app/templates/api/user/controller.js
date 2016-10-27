@@ -1,17 +1,17 @@
 import _ from 'lodash'
 import { success, notFound } from '../../services/response/'
-import { User } from '.'
+import { <%= userApiPascal %> } from '.'
 
 export const index = ({ querymen: { query, select, cursor } }, res, next) =>
-  User.find(query, select, cursor)
-    .then((users) => users.map((user) => user.view()))
+  <%= userApiPascal %>.find(query, select, cursor)
+    .then((<%= userApiCamels %>) => <%= userApiCamels %>.map((<%= userApiCamel %>) => <%= userApiCamel %>.view()))
     .then(success(res))
     .catch(next)
 
 export const show = ({ params }, res, next) =>
-  User.findById(params.id)
+  <%= userApiPascal %>.findById(params.id)
     .then(notFound(res))
-    .then((user) => user ? user.view() : null)
+    .then((<%= userApiCamel %>) => <%= userApiCamel %> ? <%= userApiCamel %>.view() : null)
     .then(success(res))
     .catch(next)
 
@@ -19,8 +19,8 @@ export const showMe = ({ user }, res) =>
   res.json(user.view(true))
 
 export const create = ({ bodymen: { body } }, res, next) =>
-  User.create(body)
-    .then((user) => user.view(true))
+  <%= userApiPascal %>.create(body)
+    .then((<%= userApiCamel %>) => <%= userApiCamel %>.view(true))
     .then(success(res, 201))
     .catch((err) => {
       /* istanbul ignore else */
@@ -36,7 +36,7 @@ export const create = ({ bodymen: { body } }, res, next) =>
     })
 
 export const update = ({ bodymen: { body }, params, user }, res, next) =>
-  User.findById(params.id === 'me' ? user.id : params.id)
+  <%= userApiPascal %>.findById(params.id === 'me' ? user.id : params.id)
     .then(notFound(res))
     .then((result) => {
       if (!result) return null
@@ -45,20 +45,20 @@ export const update = ({ bodymen: { body }, params, user }, res, next) =>
       if (!isSelfUpdate && !isAdmin) {
         res.status(401).json({
           valid: false,
-          message: 'You can\'t change other user\'s data'
+          message: 'You can\'t change other <%= userApiCamel %>\'s data'
         })
         return null
       }
       return result
     })
-    .then((user) => user ? _.merge(user, body).save() : null)
-    .then((user) => user ? user.view(true) : null)
+    .then((<%= userApiCamel %>) => <%= userApiCamel %> ? _.merge(<%= userApiCamel %>, body).save() : null)
+    .then((<%= userApiCamel %>) => <%= userApiCamel %> ? <%= userApiCamel %>.view(true) : null)
     .then(success(res))
     .catch(next)
 
 <%_ if (passwordSignup) { _%>
 export const updatePassword = ({ bodymen: { body }, params, user }, res, next) =>
-  User.findById(params.id === 'me' ? user.id : params.id)
+  <%= userApiPascal %>.findById(params.id === 'me' ? user.id : params.id)
     .then(notFound(res))
     .then((result) => {
       if (!result) return null
@@ -67,21 +67,21 @@ export const updatePassword = ({ bodymen: { body }, params, user }, res, next) =
         res.status(401).json({
           valid: false,
           param: 'password',
-          message: 'You can\'t change other user\'s password'
+          message: 'You can\'t change other <%= userApiCamel %>\'s password'
         })
         return null
       }
       return result
     })
-    .then((user) => user ? user.set({ password: body.password }).save() : null)
-    .then((user) => user ? user.view(true) : null)
+    .then((<%= userApiCamel %>) => <%= userApiCamel %> ? <%= userApiCamel %>.set({ password: body.password }).save() : null)
+    .then((<%= userApiCamel %>) => <%= userApiCamel %> ? <%= userApiCamel %>.view(true) : null)
     .then(success(res))
     .catch(next)
 
 <%_ } _%>
 export const destroy = ({ params }, res, next) =>
-  User.findById(params.id)
+  <%= userApiPascal %>.findById(params.id)
     .then(notFound(res))
-    .then((user) => user ? user.remove() : null)
+    .then((<%= userApiCamel %>) => <%= userApiCamel %> ? <%= userApiCamel %>.remove() : null)
     .then(success(res, 204))
     .catch(next)

@@ -16,7 +16,7 @@ const compare = require('bluebird').promisify(bcrypt.compare)
 <%_ } _%>
 const roles = ['user', 'admin']
 
-const userSchema = new Schema({
+const <%= userApiCamel %>Schema = new Schema({
   email: {
     type: String,
     match: /^\S+@\S+\.\S+$/,
@@ -57,7 +57,7 @@ const userSchema = new Schema({
   timestamps: true
 })
 
-userSchema.path('email').set(function (email) {
+<%= userApiCamel %>Schema.path('email').set(function (email) {
   if (!this.picture || this.picture.indexOf('https://gravatar.com') === 0) {
     const hash = crypto.createHash('md5').update(email).digest('hex')
     this.picture = `https://gravatar.com/avatar/${hash}?d=identicon`
@@ -71,7 +71,7 @@ userSchema.path('email').set(function (email) {
 })
 
 <%_ if (passwordSignup) { _%>
-userSchema.pre('save', function (next) {
+<%= userApiCamel %>Schema.pre('save', function (next) {
   if (!this.isModified('password')) return next()
 
   /* istanbul ignore next */
@@ -86,7 +86,7 @@ userSchema.pre('save', function (next) {
 })
 
 <%_ } _%>
-userSchema.methods = {
+<%= userApiCamel %>Schema.methods = {
   view (full) {
     let view = {}
     let fields = ['id', 'name', 'picture']
@@ -106,31 +106,32 @@ userSchema.methods = {
   <%_ } _%>
 }
 
-userSchema.statics = {
+<%= userApiCamel %>Schema.statics = {
   <%_ if (authServices.length) { _%>
   roles,
 
   createFromService ({ service, id, email, name, picture }) {
-    return this.findOne({ $or: [{ [`services.${service}`]: id }, { email }] }).then((user) => {
-      if (user) {
-        user.services[service] = id
-        user.name = name
-        user.picture = picture
-        return user.save()
-      } else {
-        <%_ if (passwordSignup) { _%>
-        const password = randtoken.generate(16)
-        <%_ } _%>
-        return this.create({ services: { [service]: id }, email<% if (passwordSignup) { %>, password<% } %>, name, picture })
-      }
-    })
+    return this.findOne({ $or: [{ [`services.${service}`]: id }, { email }] })
+      .then((<%= userApiCamel %>) => {
+        if (<%= userApiCamel %>) {
+          <%= userApiCamel %>.services[service] = id
+          <%= userApiCamel %>.name = name
+          <%= userApiCamel %>.picture = picture
+          return <%= userApiCamel %>.save()
+        } else {
+          <%_ if (passwordSignup) { _%>
+          const password = randtoken.generate(16)
+          <%_ } _%>
+          return this.create({ services: { [service]: id }, email<% if (passwordSignup) { %>, password<% } %>, name, picture })
+        }
+      })
   }
   <%_ } else { _%>
   roles
   <%_ } _%>
 }
 
-userSchema.plugin(mongooseKeywords, { paths: ['email', 'name'] })
+<%= userApiCamel %>Schema.plugin(mongooseKeywords, { paths: ['email', 'name'] })
 
-module.exports = mongoose.model('User', userSchema)
+module.exports = mongoose.model('<%= userApiPascal %>', <%= userApiCamel %>Schema)
 export default module.exports

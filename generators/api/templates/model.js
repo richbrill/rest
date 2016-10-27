@@ -5,7 +5,7 @@ const <%= camel %>Schema = new Schema({
   <%_ if (storeUser) { _%>
   <%= userField %>: {
     type: Schema.ObjectId,
-    ref: 'User',
+    ref: '<%= userApiPascal %>',
     required: true
   }<%= modelFields.length ? ',' : '' %>
   <%_ } _%>

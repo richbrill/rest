@@ -1,23 +1,27 @@
 import { <%= pascal %> } from '.'
 <%_ if (storeUser) { _%>
-import { User } from '../user'
+import { <%= userApiPascal %> } from '../<%= userApiKebab %>'
 <%_ } _%>
 
-let <%= storeUser ? 'user, ' : '' %><%= camel %>
+let <%= storeUser ? userApiCamel + ', ' : '' %><%= camel %>
 
 beforeEach(async () => {
   <%_ if (storeUser) { _%>
-  user = await User.create({ email: 'a@a.com', password: '123456' })
+  <%= userApiCamel %> = await <%= userApiPascal %>.create({ email: 'a@a.com', password: '123456' })
   <%_ } _%>
   <%_ if (modelFields.length) { _%>
   <%= camel %> = await <%= pascal %>.create({ <%-
-    storeUser ? userField === 'user' ? 'user, ' : userField + ': user, ' : ''
+    storeUser
+    ? userField === userApiCamel ? userApiCamel + ', ' : userField + ': ' + userApiCamel + ', '
+    : ''
   %><%- modelFields.map(function (field) {
     return field + ": 'test'";
   }).join(', ') %> })
   <%_ } else { _%>
   <%= camel %> = await <%= pascal %>.create({<%-
-    storeUser ? userField === 'user' ? ' user ' : ' ' + userField + ': user ' : ''
+    storeUser
+    ? userField === userApiCamel ? userApiCamel : ' ' + userField + ': ' + userApiCamel + ' '
+    : ''
   %>})
   <%_ } _%>
 })
@@ -29,7 +33,7 @@ describe('view', () => {
     expect(view.id).toBe(<%= camel %>.id)
     <%_ if (storeUser) { _%>
     expect(typeof view.<%= userField %>).toBe('object')
-    expect(view.<%= userField %>.id).toBe(user.id)
+    expect(view.<%= userField %>.id).toBe(<%= userApiCamel %>.id)
     <%_ } _%>
     <%_ modelFields.forEach(function (field) { _%>
     expect(view.<%= field %>).toBe(<%= camel %>.<%= field %>)
@@ -44,7 +48,7 @@ describe('view', () => {
     expect(view.id).toBe(<%= camel %>.id)
     <%_ if (storeUser) { _%>
     expect(typeof view.<%= userField %>).toBe('object')
-    expect(view.<%= userField %>.id).toBe(user.id)
+    expect(view.<%= userField %>.id).toBe(<%= userApiCamel %>.id)
     <%_ } _%>
     <%_ modelFields.forEach(function (field) { _%>
     expect(view.<%= field %>).toBe(<%= camel %>.<%= field %>)

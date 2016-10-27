@@ -10,6 +10,10 @@ module.exports = yeoman.Base.extend({
     var srcDir = this.config.get('srcDir') || 'src';
     var apiDir = this.config.get('apiDir') || 'api';
     var authMethods = this.config.get('authMethods') || [];
+    var userApiKebab = this.config.get('userApi') || 'user';
+    var userApiKebabs = pluralize(userApiKebab);
+    var userApiCamel = _.camelCase(userApiKebab);
+    var userApiPascal = _.upperFirst(userApiCamel);
 
     var methods = [
       {name: 'Create (POST)', value: 'POST'},
@@ -64,7 +68,7 @@ module.exports = yeoman.Base.extend({
     }, {
       type: 'checkbox',
       name: 'adminMethods',
-      message: 'Which methods are only accessible by authenticated admin users?',
+      message: 'Which methods are only accessible by authenticated admin ' + userApiKebabs + '?',
       default: [],
       choices: function (props) {
         var choices = getSelectedMethods(props);
@@ -81,7 +85,7 @@ module.exports = yeoman.Base.extend({
     }, {
       type: 'checkbox',
       name: 'userMethods',
-      message: 'Which methods are only accessible by authenticated users?',
+      message: 'Which methods are only accessible by authenticated ' + userApiKebabs + '?',
       default: [],
       choices: function (props) {
         var choices = getSelectedMethods(props);
@@ -89,7 +93,7 @@ module.exports = yeoman.Base.extend({
           if (props.masterMethods.indexOf(choice.value) !== -1) {
             return _.assign({}, choice, {disabled: 'Accessible only with master key'});
           } else if (props.adminMethods.indexOf(choice.value) !== -1) {
-            return _.assign({}, choice, {disabled: 'Accessible only by admin users'});
+            return _.assign({}, choice, {disabled: 'Accessible only by admin ' + userApiKebabs});
           }
           return choice;
         });
@@ -114,7 +118,7 @@ module.exports = yeoman.Base.extend({
       name: 'storeUser',
       default: true,
       message: function (props) {
-        return 'Do you want to store in a field the user who created the ' + props.kebab + '?';
+        return 'Do you want to store in a field the ' + userApiKebab + ' who created the ' + props.kebab + '?';
       },
       when: function (props) {
         return props.generateModel && props.userMethods && props.userMethods.indexOf('POST') !== -1;
@@ -122,8 +126,8 @@ module.exports = yeoman.Base.extend({
     }, {
       type: 'input',
       name: 'userField',
-      message: 'What\'s the name of the field which will store the user?',
-      default: 'user',
+      message: 'What\'s the name of the field which will store the ' + userApiKebab + '?',
+      default: userApiCamel,
       when: function (props) {
         return props.storeUser;
       }
@@ -131,6 +135,9 @@ module.exports = yeoman.Base.extend({
 
     return this.prompt(prompts).then(function (props) {
       this.props = props;
+      this.props.userApiKebab = userApiKebab;
+      this.props.userApiCamel = userApiCamel;
+      this.props.userApiPascal = userApiPascal;
       this.props.camel = _.camelCase(this.props.kebab);
       this.props.camels = pluralize(this.props.camel);
       this.props.pascal = _.upperFirst(this.props.camel);

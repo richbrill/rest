@@ -18,7 +18,7 @@ import { signSync } from '../../services/jwt'
 import express from '../../services/express'
 <%_ } _%>
 <%_ if (hasSession) { _%>
-import { User } from '../user'
+import { <%= userApiPascal %> } from '../<%= userApiKebab %>'
 <%_ } _%>
 <%_ if (methods.length) { _%>
 import routes<% if (generateModel) { %>, { <%= pascal %> }<% } %> from '.'
@@ -38,16 +38,16 @@ let <%- variables.join(', ') %>
 
 beforeEach(async () => {
   <%_ if (hasSession) { _%>
-  const user = await User.create({ email: 'a@a.com', password: '123456' })
+  const <%= userApiCamel %> = await <%= userApiPascal %>.create({ email: 'a@a.com', password: '123456' })
   <%_ if (hasAnotherSession) { _%>
-  const anotherUser = await User.create({ email: 'b@b.com', password: '123456' })
+  const another<%= userApiPascal %> = await <%= userApiPascal %>.create({ email: 'b@b.com', password: '123456' })
   <%_ } _%>
   <%_ if (hasAdminSession) { _%>
-  const admin = await User.create({ email: 'c@c.com', password: '123456', role: 'admin' })
+  const admin = await <%= userApiPascal %>.create({ email: 'c@c.com', password: '123456', role: 'admin' })
   <%_ } _%>
-  userSession = signSync(user.id)
+  userSession = signSync(<%= userApiCamel %>.id)
   <%_ if (hasAnotherSession) { _%>
-  anotherSession = signSync(anotherUser.id)
+  anotherSession = signSync(another<%= userApiPascal %>.id)
   <%_ } _%>
   <%_ if (hasAdminSession) { _%>
   adminSession = signSync(admin.id)
@@ -55,7 +55,9 @@ beforeEach(async () => {
   <%_ } _%>
   <%_ if (generateModel) { _%>
   <%= camel %> = await <%= pascal %>.create({<%=
-    storeUser ? userField === 'user' ? ' user ' : ' ' + userField + ': user ' : ''
+    storeUser 
+    ? userField === userApiCamel ? ' ' + userApiCamel + ' ' : ' ' + userField + ': ' + userApiCamel + ' '
+    : ''
   %>})
   <%_ } _%>
 })

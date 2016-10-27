@@ -1,75 +1,75 @@
 import crypto from 'crypto'
-import { User } from '.'
+import { <%= userApiPascal %> } from '.'
 
-let user
+let <%= userApiCamel %>
 
 beforeEach(async () => {
-  user = await User.create({ name: 'user', email: 'a@a.com', password: '123456' })
+  <%= userApiCamel %> = await <%= userApiPascal %>.create({ name: 'user', email: 'a@a.com', password: '123456' })
 })
 
 describe('set email', () => {
   it('sets name automatically', () => {
-    user.name = ''
-    user.email = 'test@example.com'
-    expect(user.name).toBe('test')
+    <%= userApiCamel %>.name = ''
+    <%= userApiCamel %>.email = 'test@example.com'
+    expect(<%= userApiCamel %>.name).toBe('test')
   })
 
   it('sets picture automatically', () => {
-    const hash = crypto.createHash('md5').update(user.email).digest('hex')
-    expect(user.picture).toBe(`https://gravatar.com/avatar/${hash}?d=identicon`)
+    const hash = crypto.createHash('md5').update(<%= userApiCamel %>.email).digest('hex')
+    expect(<%= userApiCamel %>.picture).toBe(`https://gravatar.com/avatar/${hash}?d=identicon`)
   })
 
   it('changes picture when it is gravatar', () => {
-    user.email = 'b@b.com'
-    const hash = crypto.createHash('md5').update(user.email).digest('hex')
-    expect(user.picture).toBe(`https://gravatar.com/avatar/${hash}?d=identicon`)
+    <%= userApiCamel %>.email = 'b@b.com'
+    const hash = crypto.createHash('md5').update(<%= userApiCamel %>.email).digest('hex')
+    expect(<%= userApiCamel %>.picture).toBe(`https://gravatar.com/avatar/${hash}?d=identicon`)
   })
 
   it('does not change picture when it is already set and is not gravatar', () => {
-    user.picture = 'not_gravatar.jpg'
-    user.email = 'c@c.com'
-    expect(user.picture).toBe('not_gravatar.jpg')
+    <%= userApiCamel %>.picture = 'not_gravatar.jpg'
+    <%= userApiCamel %>.email = 'c@c.com'
+    expect(<%= userApiCamel %>.picture).toBe('not_gravatar.jpg')
   })
 })
 
 describe('view', () => {
   it('returns simple view', () => {
-    const view = user.view()
+    const view = <%= userApiCamel %>.view()
     expect(view).toBeDefined()
-    expect(view.id).toBe(user.id)
-    expect(view.name).toBe(user.name)
-    expect(view.picture).toBe(user.picture)
+    expect(view.id).toBe(<%= userApiCamel %>.id)
+    expect(view.name).toBe(<%= userApiCamel %>.name)
+    expect(view.picture).toBe(<%= userApiCamel %>.picture)
   })
 
   it('returns full view', () => {
-    const view = user.view(true)
+    const view = <%= userApiCamel %>.view(true)
     expect(view).toBeDefined()
-    expect(view.id).toBe(user.id)
-    expect(view.name).toBe(user.name)
-    expect(view.email).toBe(user.email)
-    expect(view.picture).toBe(user.picture)
-    expect(view.createdAt).toEqual(user.createdAt)
+    expect(view.id).toBe(<%= userApiCamel %>.id)
+    expect(view.name).toBe(<%= userApiCamel %>.name)
+    expect(view.email).toBe(<%= userApiCamel %>.email)
+    expect(view.picture).toBe(<%= userApiCamel %>.picture)
+    expect(view.createdAt).toEqual(<%= userApiCamel %>.createdAt)
   })
 })
 <%_ if (passwordSignup) { _%>
 
 describe('authenticate', () => {
-  it('returns the user when authentication succeed', async () => {
-    expect(await user.authenticate('123456')).toBe(user)
+  it('returns the <%= userApiLower %> when authentication succeed', async () => {
+    expect(await <%= userApiCamel %>.authenticate('123456')).toBe(<%= userApiCamel %>)
   })
 
   it('returns false when authentication fails', async () => {
-    expect(await user.authenticate('blah')).toBe(false)
+    expect(await <%= userApiCamel %>.authenticate('blah')).toBe(false)
   })
 })
 <%_ } _%>
 <%_ if (authServices.length) { _%>
 
 describe('createFromService', () => {
-  let serviceUser
+  let service<%= userApiPascal %>
 
   beforeEach(() => {
-    serviceUser = {
+    service<%= userApiPascal %> = {
       id: '123',
       name: 'Test Name',
       email: 'test@test.com',
@@ -80,39 +80,39 @@ describe('createFromService', () => {
   ;['<%- authServices.join("', '") %>'].forEach((service) => {
     describe(service, () => {
       beforeEach(() => {
-        serviceUser.service = service
+        service<%= userApiPascal %>.service = service
       })
 
-      it('updates user when email is already registered', async () => {
-        const updatedUser = await User.createFromService({ ...serviceUser, email: 'a@a.com' })
+      it('updates <%= userApiLower %> when email is already registered', async () => {
+        const updated<%= userApiPascal %> = await <%= userApiPascal %>.createFromService({ ...service<%= userApiPascal %>, email: 'a@a.com' })
         // keep
-        expect(updatedUser.id).toBe(user.id)
-        expect(updatedUser.email).toBe(user.email)
+        expect(updated<%= userApiPascal %>.id).toBe(<%= userApiCamel %>.id)
+        expect(updated<%= userApiPascal %>.email).toBe(<%= userApiCamel %>.email)
         // update
-        expect(updatedUser.name).toBe(serviceUser.name)
-        expect(updatedUser.services[service]).toBe(serviceUser.id)
-        expect(updatedUser.picture).toBe(serviceUser.picture)
+        expect(updated<%= userApiPascal %>.name).toBe(service<%= userApiPascal %>.name)
+        expect(updated<%= userApiPascal %>.services[service]).toBe(service<%= userApiPascal %>.id)
+        expect(updated<%= userApiPascal %>.picture).toBe(service<%= userApiPascal %>.picture)
       })
 
-      it('updates user when service id is already registered', async () => {
-        await user.set({ services: { [service]: serviceUser.id } }).save()
-        const updatedUser = await User.createFromService(serviceUser)
+      it('updates <%= userApiLower %> when service id is already registered', async () => {
+        await <%= userApiCamel %>.set({ services: { [service]: service<%= userApiPascal %>.id } }).save()
+        const updated<%= userApiPascal %> = await <%= userApiPascal %>.createFromService(service<%= userApiPascal %>)
         // keep
-        expect(updatedUser.id).toBe(user.id)
-        expect(updatedUser.email).toBe(user.email)
+        expect(updated<%= userApiPascal %>.id).toBe(<%= userApiCamel %>.id)
+        expect(updated<%= userApiPascal %>.email).toBe(<%= userApiCamel %>.email)
         // update
-        expect(updatedUser.name).toBe(serviceUser.name)
-        expect(updatedUser.services[service]).toBe(serviceUser.id)
-        expect(updatedUser.picture).toBe(serviceUser.picture)
+        expect(updated<%= userApiPascal %>.name).toBe(service<%= userApiPascal %>.name)
+        expect(updated<%= userApiPascal %>.services[service]).toBe(service<%= userApiPascal %>.id)
+        expect(updated<%= userApiPascal %>.picture).toBe(service<%= userApiPascal %>.picture)
       })
 
-      it('creates a new user when neither service id and email was found', async () => {
-        const createdUser = await User.createFromService(serviceUser)
-        expect(createdUser.id).not.toBe(user.id)
-        expect(createdUser.services[service]).toBe(serviceUser.id)
-        expect(createdUser.name).toBe(serviceUser.name)
-        expect(createdUser.email).toBe(serviceUser.email)
-        expect(createdUser.picture).toBe(serviceUser.picture)
+      it('creates a new <%= userApiLower %> when neither service id and email was found', async () => {
+        const created<%= userApiPascal %> = await <%= userApiPascal %>.createFromService(service<%= userApiPascal %>)
+        expect(created<%= userApiPascal %>.id).not.toBe(<%= userApiCamel %>.id)
+        expect(created<%= userApiPascal %>.services[service]).toBe(service<%= userApiPascal %>.id)
+        expect(created<%= userApiPascal %>.name).toBe(service<%= userApiPascal %>.name)
+        expect(created<%= userApiPascal %>.email).toBe(service<%= userApiPascal %>.email)
+        expect(created<%= userApiPascal %>.picture).toBe(service<%= userApiPascal %>.picture)
       })
     })
   })

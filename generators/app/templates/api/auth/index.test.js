@@ -4,7 +4,7 @@ import { stub } from 'sinon'
 import request from 'supertest-as-promised'
 <%_ if (passwordSignup) { _%>
 import { masterKey } from '../../config'
-import { User } from '../user'
+import { <%= userApiPascal %> } from '../<%= userApiKebab %>'
 <%_ } _%>
 import { verify } from '../../services/jwt'
 <%_ authServices.forEach(function(service) { _%>
@@ -16,10 +16,10 @@ import routes from '.'
 const app = () => express(routes)
 <%_ if (passwordSignup) { _%>
 
-let user
+let <%= userApiCamel %>
 
 beforeEach(async () => {
-  user = await User.create({ email: 'a@a.com', password: '123456' })
+  <%= userApiCamel %> = await <%= userApiPascal %>.create({ email: 'a@a.com', password: '123456' })
 })
 
 test('POST /auth 201 (master)', async () => {
@@ -30,8 +30,8 @@ test('POST /auth 201 (master)', async () => {
   expect(status).toBe(201)
   expect(typeof body).toBe('object')
   expect(typeof body.token).toBe('string')
-  expect(typeof body.user).toBe('object')
-  expect(body.user.id).toBe(user.id)
+  expect(typeof body.<%= userApiCamel %>).toBe('object')
+  expect(body.<%= userApiCamel %>.id).toBe(<%= userApiCamel %>.id)
   expect(await verify(body.token)).toBeTruthy()
 })
 
@@ -101,7 +101,7 @@ test('POST /auth/<%= service %> 201', async () => {
   expect(status).toBe(201)
   expect(typeof body).toBe('object')
   expect(typeof body.token).toBe('string')
-  expect(typeof body.user).toBe('object')
+  expect(typeof body.<%= userApiCamel %>).toBe('object')
   expect(await verify(body.token)).toBeTruthy()
 })
 

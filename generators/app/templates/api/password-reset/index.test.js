@@ -2,17 +2,17 @@ import request from 'supertest-as-promised'
 import nock from 'nock'
 import express from '../../services/express'
 import { masterKey } from '../../config'
-import { User } from '../user'
+import { <%= userApiPascal %> } from '../<%= userApiKebab %>'
 import routes, { PasswordReset } from '.'
 
 const app = () => express(routes)
 
-let user, passwordReset
+let <%= userApiCamel %>, passwordReset
 
 beforeEach(async () => {
   nock('https://api.sendgrid.com').post('/v3/mail/send').reply(202)
-  user = await User.create({ email: 'a@a.com', password: '123456' })
-  passwordReset = await PasswordReset.create({ user })
+  <%= userApiCamel %> = await <%= userApiPascal %>.create({ email: 'a@a.com', password: '123456' })
+  passwordReset = await PasswordReset.create({ <%= userApiCamel %> })
 })
 
 afterEach(() => {
@@ -72,8 +72,8 @@ test('GET /password-resets/:token 200', async () => {
   expect(status).toBe(200)
   expect(typeof body).toBe('object')
   expect(typeof body.token).toBe('string')
-  expect(typeof body.user).toBe('object')
-  expect(body.user.id).toBe(user.id)
+  expect(typeof body.<%= userApiCamel %>).toBe('object')
+  expect(body.<%= userApiCamel %>.id).toBe(<%= userApiCamel %>.id)
 })
 
 test('GET /password-resets/:token 404', async () => {
@@ -82,20 +82,20 @@ test('GET /password-resets/:token 404', async () => {
 })
 
 test('PUT /password-resets/:token 200', async () => {
-  await PasswordReset.create({ user })
+  await PasswordReset.create({ <%= userApiCamel %> })
   const { status, body } = await request(app())
     .put(`/${passwordReset.token}`)
     .send({ password: '654321' })
-  const [ updatedUser, passwordResets ] = await Promise.all([
-    User.findById(passwordReset.user.id),
+  const [ updated<%= userApiPascal %>, passwordResets ] = await Promise.all([
+    <%= userApiPascal %>.findById(passwordReset.<%= userApiCamel %>.id),
     PasswordReset.find({})
   ])
   expect(status).toBe(200)
   expect(typeof body).toBe('object')
-  expect(body.id).toBe(user.id)
+  expect(body.id).toBe(<%= userApiCamel %>.id)
   expect(passwordResets.length).toBe(0)
-  expect(await updatedUser.authenticate('123456')).toBeFalsy()
-  expect(await updatedUser.authenticate('654321')).toBeTruthy()
+  expect(await updated<%= userApiPascal %>.authenticate('123456')).toBeFalsy()
+  expect(await updated<%= userApiPascal %>.authenticate('654321')).toBeTruthy()
 })
 
 test('PUT /password-resets/:token 400 - invalid password', async () => {

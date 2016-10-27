@@ -171,6 +171,13 @@ describe('generator-rest', function () {
     it('should install and pass tests', function () {});
   });
 
+  describe('install with different user api name', function () {
+    before(function (done) {
+      install({userApi: 'Something-Very_Different'}, done, true);
+    });
+    it('should install and pass tests', function () {});
+  });
+
   authServices.forEach(function (service) {
     describe('install with ' + service + ' auth method', function () {
       before(function (done) {

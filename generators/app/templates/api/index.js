@@ -1,6 +1,6 @@
 import { Router } from 'express'
 <%_ if (generateAuthApi) { _%>
-import user from './user'
+import <%= userApiCamel %> from './<%= userApiKebab %>'
 import auth from './auth'
 <%_ } _%>
 <%_ if (typeof passwordReset !== 'undefined' && passwordReset) { _%>
@@ -33,7 +33,7 @@ const router = new Router()
  * @apiParam {String[]} [fields] Fields to be returned.
  */
 <%_ if (generateAuthApi) { _%>
-router.use('/users', user)
+router.use('/<%= userApiKebabs %>', <%= userApiCamel %>)
 router.use('/auth', auth)
 <%_ } _%>
 <%_ if (typeof passwordReset !== 'undefined' && passwordReset) { _%>

@@ -3,6 +3,7 @@ var yeoman = require('yeoman-generator');
 var chalk = require('chalk');
 var yosay = require('yosay');
 var randtoken = require('rand-token');
+var pluralize = require('pluralize');
 var _ = require('lodash');
 
 module.exports = yeoman.Base.extend({
@@ -40,6 +41,11 @@ module.exports = yeoman.Base.extend({
       name: 'generateAuthApi',
       message: 'Do you want to generate authentication API?',
       default: true
+    }, {
+      type: 'input',
+      name: 'userApi',
+      message: 'What should be the name of the user API?',
+      default: 'user'
     }, {
       type: 'checkbox',
       name: 'authMethods',
@@ -81,6 +87,14 @@ module.exports = yeoman.Base.extend({
       that.props.masterKey = randtoken.uid(32);
       if (that.props.generateAuthApi) {
         that.props.jwtSecret = randtoken.uid(32);
+        that.config.set({userApi: props.userApi});
+        that.props.userApiKebab = props.userApi;
+        that.props.userApiKebabs = pluralize(that.props.userApiKebab);
+        that.props.userApiCamel = _.camelCase(that.props.userApiKebab);
+        that.props.userApiCamels = pluralize(that.props.userApiCamel);
+        that.props.userApiLower = _.lowerCase(that.props.userApiCamel);
+        that.props.userApiLowers = _.lowerCase(that.props.userApiCamels);
+        that.props.userApiPascal = _.upperFirst(that.props.userApiCamel);
       }
       that.config.set({
         srcDir: props.srcDir,
@@ -114,7 +128,7 @@ module.exports = yeoman.Base.extend({
     if (props.generateAuthApi) {
       copyTpl(tPath('services/passport'), dPath(props.srcDir + '/services/passport'), props);
       copyTpl(tPath('services/jwt'), dPath(props.srcDir + '/services/jwt'), props);
-      copyTpl(tPath('api/user'), dPath(props.srcDir + '/' + props.apiDir + '/user'), props);
+      copyTpl(tPath('api/user'), dPath(props.srcDir + '/' + props.apiDir + '/' + props.userApi), props);
 
       if (props.authMethods.length) {
         copyTpl(tPath('api/auth'), dPath(props.srcDir + '/' + props.apiDir + '/auth'), props);

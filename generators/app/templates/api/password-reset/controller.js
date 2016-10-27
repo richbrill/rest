@@ -1,18 +1,18 @@
 import { success, notFound } from '../../services/response/'
 import { sendMail } from '../../services/sendgrid'
 import { PasswordReset } from '.'
-import { User } from '../user'
+import { <%= userApiPascal %> } from '../<%= userApiCamel %>'
 
 export const create = ({ bodymen: { body: { email, link } } }, res, next) =>
-  User.findOne({ email })
+  <%= userApiPascal %>.findOne({ email })
     .then(notFound(res))
-    .then((user) => user ? PasswordReset.create({ user }) : null)
+    .then((<%= userApiCamel %>) => <%= userApiCamel %> ? PasswordReset.create({ <%= userApiCamel %> }) : null)
     .then((reset) => {
       if (!reset) return null
-      const { user, token } = reset
+      const { <%= userApiCamel %>, token } = reset
       link = `${link.replace(/\/$/, '')}/${token}`
       const content = `
-        Hey, ${user.name}.<br><br>
+        Hey, ${<%= userApiCamel %>.name}.<br><br>
         You requested a new password for your <%= name %> account.<br>
         Please use the following link to set a new password. It will expire in 1 hour.<br><br>
         <a href="${link}">${link}</a><br><br>
@@ -26,7 +26,7 @@ export const create = ({ bodymen: { body: { email, link } } }, res, next) =>
 
 export const show = ({ params: { token } }, res, next) =>
   PasswordReset.findOne({ token })
-    .populate('user')
+    .populate('<%= userApiCamel %>')
     .then(notFound(res))
     .then((reset) => reset ? reset.view(true) : null)
     .then(success(res))
@@ -34,14 +34,14 @@ export const show = ({ params: { token } }, res, next) =>
 
 export const update = ({ params: { token }, bodymen: { body: { password } } }, res, next) => {
   return PasswordReset.findOne({ token })
-    .populate('user')
+    .populate('<%= userApiCamel %>')
     .then(notFound(res))
     .then((reset) => {
       if (!reset) return null
-      const { user } = reset
-      return user.set({ password }).save()
-        .then(() => PasswordReset.remove({ user }))
-        .then(() => user.view(true))
+      const { <%= userApiCamel %> } = reset
+      return <%= userApiCamel %>.set({ password }).save()
+        .then(() => PasswordReset.remove({ <%= userApiCamel %> }))
+        .then(() => <%= userApiCamel %>.view(true))
     })
     .then(success(res))
     .catch(next)

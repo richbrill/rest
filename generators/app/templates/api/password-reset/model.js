@@ -2,9 +2,9 @@ import mongoose, { Schema } from 'mongoose'
 import { uid } from 'rand-token'
 
 const passwordResetSchema = new Schema({
-  user: {
+  <%= userApiCamel %>: {
     type: Schema.ObjectId,
-    ref: 'User',
+    ref: '<%= userApiPascal %>',
     index: true
   },
   token: {
@@ -23,7 +23,7 @@ const passwordResetSchema = new Schema({
 passwordResetSchema.methods = {
   view (full) {
     return {
-      user: this.user.view(full),
+      <%= userApiCamel %>: this.<%= userApiCamel %>.view(full),
       token: this.token
     }
   }
