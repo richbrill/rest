@@ -69,7 +69,7 @@ Express server listening on http://0.0.0.0:9000, in development mode
 ```
 
 If you choose to generate the authentication API, you can start to play with it.
-> Note that creating and authenticating users needs a master key (which is defined in the `.env` file)
+> Note that creating and authenticating users needs a master key (which is defined in the `.env` file).
 
 Create a user (sign up):
 ```bash
@@ -90,6 +90,7 @@ HTTP/1.1 201 Created
 ```
 
 Authenticate the user (sign in):
+> Note that if you're authenticating a user from a front-end client you probably don't want to include your MASTER_KEY. In that case you'll want to remove the middleware call to invoke master() from api/auth/index.js
 ```bash
 curl -X POST http://0.0.0.0:9000/auth -i -u test@example.com:123456 -d "access_token=MASTER_KEY_HERE"
 ```
