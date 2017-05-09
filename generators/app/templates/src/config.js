@@ -24,7 +24,7 @@ const config = {
     env: process.env.NODE_ENV || 'development',
     root: path.join(__dirname, '..'),
     port: process.env.PORT || 9000,
-    ip: process.env.IP || '0.0.0.0',
+    host: process.env.IP || localhost,
     <%_ if (typeof passwordReset !== 'undefined' && passwordReset) { _%>
     defaultEmail: 'no-reply@<%= slug %>.com',
     <%_ } _%>
